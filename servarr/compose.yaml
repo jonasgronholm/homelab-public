@@ -4,7 +4,7 @@ networks:
     name: servarrnetwork
     ipam:
       config:
-        - subnet: 172.39.0.0/24
+        - subnet: <container-ip>/24
 
 services:
   gluetun:
@@ -16,7 +16,7 @@ services:
       - /dev/net/tun:/dev/net/tun 
     networks:
       servarrnetwork:
-        ipv4_address: 172.39.0.2
+        ipv4_address: <container-ip>
     ports:
       - 8080:8080 # qbittorrent web interface
       - 6881:6881 # qbittorrent torrent port
@@ -123,7 +123,7 @@ services:
       - 8989:8989
     networks:
       servarrnetwork:
-        ipv4_address: 172.39.0.3
+        ipv4_address: <container-ip>
 
   radarr:
     image: lscr.io/linuxserver/radarr:6.1.1.10360-ls298
@@ -141,7 +141,7 @@ services:
       - 7878:7878
     networks:
       servarrnetwork:
-        ipv4_address: 172.39.0.4
+        ipv4_address: <container-ip>
 
   lidarr:
     container_name: lidarr
@@ -159,7 +159,7 @@ services:
       - 8686:8686
     networks:
       servarrnetwork:
-        ipv4_address: 172.39.0.5
+        ipv4_address: <container-ip>
 
   bazarr:
     image: lscr.io/linuxserver/bazarr:v1.5.6-ls342
@@ -177,7 +177,7 @@ services:
       - 6767:6767
     networks:
       servarrnetwork:
-        ipv4_address: 172.39.0.6
+        ipv4_address: <container-ip>
 
   seerr:
     container_name: seerr
@@ -191,5 +191,5 @@ services:
       - 5055:5055
     networks:
       servarrnetwork:
-        ipv4_address: 172.39.0.9
+        ipv4_address: <container-ip>
     restart: unless-stopped

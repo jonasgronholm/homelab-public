@@ -19,13 +19,13 @@ Samba file server running as an LXC container on Proxmox.
 
 - Only accessible from local network (192.168.0.0/17)
 - Authentication required, no guest access
-- Force user/group: jonas
+- Force user/group: <your-username>
 
 ## Restore
 
 1. Create new LXC on Proxmox
 2. Install Samba: `apt install samba`
-3. Create user: `adduser jonas` and `smbpasswd -a jonas`
+3. Create user: `adduser <your-username>` and `smbpasswd -a <your-username>`
 4. Mount ZFS tank pool from Proxmox host into LXC
 5. Copy `smb.conf` from this repo to `/etc/samba/smb.conf`
 6. Restart Samba: `systemctl restart smbd`

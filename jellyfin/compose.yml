@@ -4,7 +4,7 @@ services:
     container_name: jellyfin
     environment:
       - TZ=Europe/Helsinki
-      - JELLYFIN_PublishedServerUrl=http://192.168.1.102 #optional
+      - JELLYFIN_PublishedServerUrl=http://<servarr-ip> #optional
     volumes:
       - ./config:/config
       - /data:/data

@@ -29,7 +29,7 @@ curl -sfL https://get.k3s.io | K3S_URL=https://<master-ip>:6443 K3S_TOKEN=<token
 
 ### Configure kubectl on local machine
 ```bash
-scp jonas@<master-ip>:/home/jonas/k3s.yaml ~/.kube/config
+scp <your-username>@<master-ip>:/home/<your-username>/k3s.yaml ~/.kube/config
 sed -i 's/127.0.0.1/<master-ip>/' ~/.kube/config
 ```
 
