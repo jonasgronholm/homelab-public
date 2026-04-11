@@ -2,6 +2,8 @@
 
 Personal homelab built and maintained as a hands-on learning environment for cloud-native and DevOps technologies. All configuration is version-controlled and deployed as code.
 
+> **Note:** All internal IP addresses, usernames, and domain names have been anonymized for public documentation. Replace placeholders like `<master-ip>`, `<your-username>`, and `homelab.local` with your own values.
+
 ## Technologies
 
 - **Orchestration:** Kubernetes (k3s), Docker, Docker Compose
