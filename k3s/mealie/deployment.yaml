@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mealie
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mealie-data
+  namespace: mealie
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mealie
+  namespace: mealie
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mealie
+  template:
+    metadata:
+      labels:
+        app: mealie
+    spec:
+      containers:
+        - name: mealie
+          image: ghcr.io/mealie-recipes/mealie:latest
+          ports:
+            - containerPort: 9000
+          env:
+            - name: TZ
+              value: "Europe/Helsinki"
+            - name: MAX_WORKERS
+              value: "1"
+            - name: WEB_CONCURRENCY
+              value: "1"
+            - name: BASE_URL
+              value: "https://mealie.homelab.local"
+          volumeMounts:
+            - name: mealie-data
+              mountPath: /app/data
+      volumes:
+        - name: mealie-data
+          persistentVolumeClaim:
+            claimName: mealie-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mealie
+  namespace: mealie
+spec:
+  selector:
+    app: mealie
+  ports:
+    - port: 9000
+      targetPort: 9000

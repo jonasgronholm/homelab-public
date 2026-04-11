@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unifi-poller
+  namespace: monitoring
+  labels:
+    app: unifi-poller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unifi-poller
+  template:
+    metadata:
+      labels:
+        app: unifi-poller
+    spec:
+      containers:
+        - name: unifi-poller
+          image: ghcr.io/unpoller/unpoller:v2.11.2
+          env:
+            - name: UP_UNIFI_DEFAULT_URL
+              value: "https://<unifi-ip>"
+            - name: UP_UNIFI_DEFAULT_USER
+              value: "unifipoller"
+            - name: UP_UNIFI_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: unifi-poller-secret
+                  key: UP_UNIFI_DEFAULT_PASS
+            - name: UP_UNIFI_DEFAULT_VERIFY_SSL
+              value: "false"
+            - name: UP_PROMETHEUS_DISABLE
+              value: "false"
+            - name: UP_INFLUXDB_DISABLE
+              value: "true"
+            - name: UP_LOKI_DISABLE
+              value: "true"
+          ports:
+            - containerPort: 9130
+              name: metrics
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unifi-poller
+  namespace: monitoring
+  labels:
+    app: unifi-poller
+spec:
+  selector:
+    app: unifi-poller
+  ports:
+    - name: metrics
+      port: 9130
+      targetPort: 9130
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: unifi-poller
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: unifi-poller
+  endpoints:
+    - port: metrics
+      interval: 60s
+      scrapeTimeout: 30s

@@ -1,0 +1,183 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: kube-prometheus-stack
+  namespace: kube-system
+spec:
+  repo: https://prometheus-community.github.io/helm-charts
+  chart: kube-prometheus-stack
+  #version: "69.2.0"  # pin and bump deliberately; check https://github.com/prometheus-community/helm-charts/releases #uncommented will use lastes for now
+  targetNamespace: monitoring
+  createNamespace: true
+  valuesContent: |-
+
+    # -------------------------------------------------------------------------
+    # Global
+    # -------------------------------------------------------------------------
+    fullnameOverride: kps
+
+    # -------------------------------------------------------------------------
+    # k3s component endpoint overrides
+    # k3s runs scheduler/controller-manager on 127.0.0.1 with TLS; we skip
+    # those internal components and rely on kube-state-metrics + node-exporter
+    # for the metrics that matter in practice.
+    # -------------------------------------------------------------------------
+    kubeScheduler:
+      enabled: false
+    kubeControllerManager:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+    kubeProxy:
+      enabled: false
+
+    # -------------------------------------------------------------------------
+    # Prometheus
+    # -------------------------------------------------------------------------
+    prometheus:
+      prometheusSpec:
+        retention: 30d
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 20Gi
+        # Pick up ALL ServiceMonitors/PodMonitors in the cluster regardless of
+        # which Helm release created them (needed for our custom exporters).
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        ruleSelectorNilUsesHelmValues: false
+
+        # Scrape Traefik metrics
+        additionalScrapeConfigs:
+          - job_name: traefik
+            static_configs:
+              - targets:
+                  - traefik.kube-system.svc.cluster.local:9900
+            # Traefik exposes metrics on port 9900 (metrics entrypoint).
+            # Adjust if you changed the port in your HelmChartConfig.
+
+    # -------------------------------------------------------------------------
+    # Alertmanager
+    # -------------------------------------------------------------------------
+    alertmanager:
+      alertmanagerSpec:
+        secrets:
+          - alertmanager-smtp-secret
+
+      config:
+        global:
+          smtp_smarthost: 'smtp.gmail.com:587'
+          smtp_from: 'your-email@gmail.com'
+          smtp_auth_username: 'your-email@gmail.com'
+          smtp_auth_password_file: /etc/alertmanager/secrets/alertmanager-smtp-secret/gmail-password
+          smtp_require_tls: true
+
+        route:
+          group_by: ['alertname', 'severity']
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 12h
+          receiver: email
+          routes:
+            - matchers:
+                - alertname = "Watchdog"
+              receiver: 'null'
+            - matchers:
+                - alertname = "InfoInhibitor"
+              receiver: 'null'
+
+        receivers:
+          - name: 'null'
+          - name: email
+            email_configs:
+              - to: 'jonas@homelab.local'
+                send_resolved: true
+
+    # -------------------------------------------------------------------------
+    # Node Exporter — enable hardware/thermal collectors
+    # -------------------------------------------------------------------------
+    prometheus-node-exporter:
+      extraArgs:
+        - --collector.hwmon           # CPU temps, fan speeds via /sys/class/hwmon
+        - --collector.hwmon.chip-include=coretemp|k10temp|nct6775
+        - --collector.thermal_zone    # fallback thermal zones
+        - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+|run/k3s/containerd/.+)($|/)
+        - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
+      hostPID: true
+
+    # -------------------------------------------------------------------------
+    # Grafana
+    # -------------------------------------------------------------------------
+    grafana:
+      admin:
+        existingSecret: grafana-admin-secret
+        passwordKey: admin-password
+
+      persistence:
+        enabled: true
+        size: 2Gi
+
+      # Disable the built-in Ingress — we use Traefik IngressRoute instead
+      ingress:
+        enabled: false
+
+      grafana.ini:
+        server:
+          root_url: "https://grafana.homelab.local"
+          domain: grafana.homelab.local
+
+      # Pre-load useful dashboards from grafana.com
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+            - name: default
+              orgId: 1
+              folder: ''
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/default
+
+      dashboards:
+        default:
+          # Node Exporter Full
+          node-exporter-full:
+            gnetId: 1860
+            revision: 37
+            datasource: Prometheus
+          # k3s cluster overview
+          k3s-cluster:
+            gnetId: 16450
+            revision: 1
+            datasource: Prometheus
+          # Traefik
+          traefik:
+            gnetId: 17346
+            revision: 9
+            datasource: Prometheus
+          # Proxmox (pve-exporter)
+          proxmox:
+            gnetId: 10347
+            revision: 5
+            datasource: Prometheus
+          # UniFi Poller — Client DPI
+          unifi-poller-clients:
+            gnetId: 11315
+            revision: 9
+            datasource: Prometheus
+          # UniFi Poller — USW Insights
+          unifi-poller-usw:
+            gnetId: 11312
+            revision: 9
+            datasource: Prometheus
+
+      sidecar:
+        dashboards:
+          enabled: true
+        datasources:
+          enabled: true

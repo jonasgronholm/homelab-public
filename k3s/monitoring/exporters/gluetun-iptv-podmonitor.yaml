@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: iptv-proxy
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - iptv
+  selector:
+    matchLabels:
+      app: iptv
+  podMetricsEndpoints:
+    - port: proxy-metrics
+      path: /metrics
+      interval: 60s

@@ -1,0 +1,195 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarr-external
+  namespace: kube-system
+spec:
+  type: ExternalName
+  externalName: <servarr-ip>
+  ports:
+    - port: 8989
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sonarr
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`sonarr.homelab.local`)
+      kind: Rule
+      services:
+        - name: sonarr-external
+          port: 8989
+  tls:
+    certResolver: cloudflare
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radarr-external
+  namespace: kube-system
+spec:
+  type: ExternalName
+  externalName: <servarr-ip>
+  ports:
+    - port: 7878
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: radarr
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`radarr.homelab.local`)
+      kind: Rule
+      services:
+        - name: radarr-external
+          port: 7878
+  tls:
+    certResolver: cloudflare
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyseerr-external
+  namespace: kube-system
+spec:
+  type: ExternalName
+  externalName: <servarr-ip>
+  ports:
+    - port: 5055
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: jellyseerr
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`jellyseerr.homelab.local`)
+      kind: Rule
+      services:
+        - name: jellyseerr-external
+          port: 5055
+  tls:
+    certResolver: cloudflare
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bazarr-external
+  namespace: kube-system
+spec:
+  type: ExternalName
+  externalName: <servarr-ip>
+  ports:
+    - port: 6767
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: bazarr
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`bazarr.homelab.local`)
+      kind: Rule
+      services:
+        - name: bazarr-external
+          port: 6767
+  tls:
+    certResolver: cloudflare
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lidarr-external
+  namespace: kube-system
+spec:
+  type: ExternalName
+  externalName: <servarr-ip>
+  ports:
+    - port: 8686
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: lidarr
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`lidarr.homelab.local`)
+      kind: Rule
+      services:
+        - name: lidarr-external
+          port: 8686
+  tls:
+    certResolver: cloudflare
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prowlarr-external
+  namespace: kube-system
+spec:
+  type: ExternalName
+  externalName: <servarr-ip>
+  ports:
+    - port: 9696
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prowlarr
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`prowlarr.homelab.local`)
+      kind: Rule
+      services:
+        - name: prowlarr-external
+          port: 9696
+  tls:
+    certResolver: cloudflare
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nzbget-external
+  namespace: kube-system
+spec:
+  type: ExternalName
+  externalName: <servarr-ip>
+  ports:
+    - port: 6789
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nzbget
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`nzbget.homelab.local`)
+      kind: Rule
+      services:
+        - name: nzbget-external
+          port: 6789
+  tls:
+    certResolver: cloudflare

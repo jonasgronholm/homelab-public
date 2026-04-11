@@ -1,0 +1,37 @@
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: unifi-transport
+  namespace: kube-system
+spec:
+  insecureSkipVerify: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unifi-external
+  namespace: kube-system
+spec:
+  type: ExternalName
+  externalName: <unifi-ip>
+  ports:
+    - port: 443
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: unifi
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`unifi.homelab.local`)
+      kind: Rule
+      services:
+        - name: unifi-external
+          port: 443
+          scheme: https
+          serversTransport: unifi-transport
+  tls:
+    certResolver: cloudflare

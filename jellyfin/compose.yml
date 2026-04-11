@@ -1,0 +1,18 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:10.11.8
+    container_name: jellyfin
+    environment:
+      - TZ=Europe/Helsinki
+      - JELLYFIN_PublishedServerUrl=http://192.168.1.102 #optional
+    volumes:
+      - ./config:/config
+      - /data:/data
+    devices:
+      - /dev/dri:/dev/dri #Use for Intel QuickSync
+    ports:
+      - 8096:8096
+      - 7359:7359/udp #Service Discovery
+      - 1900:1900/udp #Client Discovery
+    restart: unless-stopped
+# Remove the Jellyfin service if installed directly on system.

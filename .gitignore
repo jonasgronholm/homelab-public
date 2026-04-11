@@ -1,0 +1,8 @@
+# Never commit real env files
+.env
+*.env
+
+# Editor files
+.DS_Store
+*.swp
+*.swo

@@ -1,0 +1,118 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: homelab-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+
+    # -------------------------------------------------------------------------
+    # WireGuard key expiry alerts
+    # UniFi VPN:   expires Oct 11, 2026 (1791676800)
+    # Servarr:     expires Mar 29, 2027 (1806278400)
+    # k3s-iptv-nl: expires Mar 29, 2027 (1806278400)
+    # -------------------------------------------------------------------------
+    - name: wireguard
+      rules:
+        # UniFi VPN key — 30 day warning
+        - alert: WireGuardUnifiKeyExpiresIn30Days
+          expr: vector((1791676800 - time()) / 86400) < 30
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "UniFi WireGuard key expires in less than 30 days"
+            description: "Renew the UniFi VPN WireGuard config in ProtonVPN before Oct 11, 2026."
+
+        # UniFi VPN key — 7 day warning
+        - alert: WireGuardUnifiKeyExpiresIn7Days
+          expr: vector((1791676800 - time()) / 86400) < 7
+          for: 1h
+          labels:
+            severity: critical
+          annotations:
+            summary: "UniFi WireGuard key expires in less than 7 days — ACTION REQUIRED"
+            description: "Renew the UniFi VPN WireGuard config in ProtonVPN immediately."
+
+        # Servarr key — 30 day warning
+        - alert: WireGuardServarrKeyExpiresIn30Days
+          expr: vector((1806278400 - time()) / 86400) < 30
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Servarr WireGuard key expires in less than 30 days"
+            description: "Renew the Servarr WireGuard config in ProtonVPN before Mar 29, 2027."
+
+        # Servarr key — 7 day warning
+        - alert: WireGuardServarrKeyExpiresIn7Days
+          expr: vector((1806278400 - time()) / 86400) < 7
+          for: 1h
+          labels:
+            severity: critical
+          annotations:
+            summary: "Servarr WireGuard key expires in less than 7 days — ACTION REQUIRED"
+            description: "Renew the Servarr WireGuard config in ProtonVPN immediately."
+
+        # k3s-iptv-nl key — 30 day warning
+        - alert: WireGuardIptvKeyExpiresIn30Days
+          expr: vector((1806278400 - time()) / 86400) < 30
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "k3s-iptv-nl WireGuard key expires in less than 30 days"
+            description: "Renew the k3s-iptv-nl WireGuard config in ProtonVPN before Mar 29, 2027."
+
+        # k3s-iptv-nl key — 7 day warning
+        - alert: WireGuardIptvKeyExpiresIn7Days
+          expr: vector((1806278400 - time()) / 86400) < 7
+          for: 1h
+          labels:
+            severity: critical
+          annotations:
+            summary: "k3s-iptv-nl WireGuard key expires in less than 7 days — ACTION REQUIRED"
+            description: "Renew the k3s-iptv-nl WireGuard config in ProtonVPN immediately."
+
+    # -------------------------------------------------------------------------
+    # Node health
+    # -------------------------------------------------------------------------
+    - name: nodes
+      rules:
+        - alert: NodeHighCPUTemp
+          expr: node_hwmon_temp_celsius{chip=~"coretemp.*|k10temp.*"} > 85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU temperature on {{ $labels.instance }}"
+            description: "CPU temperature is {{ $value }}°C on {{ $labels.instance }}. Check airflow."
+
+        - alert: NodeDiskPressure
+          expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.15
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Low disk space on {{ $labels.instance }}"
+            description: "Less than 15% disk remaining on root filesystem of {{ $labels.instance }}."
+
+        - alert: NodeMemoryPressure
+          expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.10
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Low memory on {{ $labels.instance }}"
+            description: "Less than 10% memory available on {{ $labels.instance }}."
+
+        - alert: NodeDown
+          expr: up{job="node-exporter"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "k3s node unreachable: {{ $labels.instance }}"
+            description: "node-exporter on {{ $labels.instance }} has been unreachable for 2 minutes."

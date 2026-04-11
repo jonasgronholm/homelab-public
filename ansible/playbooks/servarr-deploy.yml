@@ -1,0 +1,31 @@
+---
+- name: Deploy Servarr stack
+  hosts: servarr
+  tasks:
+    - name: Sync jellyfin compose file
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../../jellyfin/compose.yml"
+        dest: /docker/jellyfin/compose.yml
+
+    - name: Sync servarr compose file
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../../servarr/compose.yaml"
+        dest: /docker/servarr/compose.yaml
+
+    - name: Pull latest jellyfin image
+      community.docker.docker_compose_v2_pull:
+        project_src: /docker/jellyfin
+
+    - name: Pull latest servarr images
+      community.docker.docker_compose_v2_pull:
+        project_src: /docker/servarr
+
+    - name: Recreate jellyfin container
+      community.docker.docker_compose_v2:
+        project_src: /docker/jellyfin
+        recreate: always
+
+    - name: Recreate servarr containers
+      community.docker.docker_compose_v2:
+        project_src: /docker/servarr
+        recreate: always

@@ -1,0 +1,84 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pve-exporter
+  namespace: monitoring
+  labels:
+    app: pve-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pve-exporter
+  template:
+    metadata:
+      labels:
+        app: pve-exporter
+    spec:
+      containers:
+        - name: pve-exporter
+          image: prompve/prometheus-pve-exporter:3.4.2
+          env:
+            - name: PVE_USER
+              value: "prometheus@pve"
+            - name: PVE_TOKEN_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: pve-exporter-secret
+                  key: token-name
+            - name: PVE_TOKEN_VALUE
+              valueFrom:
+                secretKeyRef:
+                  name: pve-exporter-secret
+                  key: token-value
+            - name: PVE_VERIFY_SSL
+              value: "false"
+          ports:
+            - containerPort: 9221
+              name: metrics
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 300m
+              memory: 64Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pve-exporter
+  namespace: monitoring
+  labels:
+    app: pve-exporter
+spec:
+  selector:
+    app: pve-exporter
+  ports:
+    - name: metrics
+      port: 9221
+      targetPort: 9221
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pve-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: pve-exporter
+  endpoints:
+    - port: metrics
+      path: /pve
+      params:
+        target: ["<proxmox-ip>"]
+        module: ["default"]
+      relabelings:
+        - sourceLabels: [__param_target]
+          targetLabel: instance
+      interval: 60s
+      scrapeTimeout: 30s

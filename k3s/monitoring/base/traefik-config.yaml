@@ -1,0 +1,41 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    globalArguments:
+      - "--global.sendanonymoususage=false"
+    additionalArguments:
+      - "--certificatesresolvers.cloudflare.acme.dnschallenge=true"
+      - "--certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.cloudflare.acme.email=jonas@homelab.local"
+      - "--certificatesresolvers.cloudflare.acme.storage=/data/acme.json"
+      - "--certificatesresolvers.cloudflare.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+      - "--providers.kubernetescrd.allowExternalNameServices=true"
+    env:
+      - name: CLOUDFLARE_DNS_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-api-token
+            key: api-token
+      - name: CLOUDFLARE_ZONE_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-api-token
+            key: api-token
+    ports:
+      websecure:
+        tls:
+          enabled: true
+      metrics:
+        port: 9100
+        expose:
+          default: false
+    metrics:
+      prometheus:
+        entryPoint: metrics
+        addEntryPointsLabels: true
+        addServicesLabels: true
+        addRoutersLabels: true

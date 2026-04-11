@@ -1,0 +1,72 @@
+- Media:
+    - Jellyfin:
+        href: https://jellyfin.homelab.local
+        icon: jellyfin.png
+        description: Media Server
+    - Seerr:
+        href: https://jellyseerr.homelab.local
+        icon: https://raw.githubusercontent.com/seerr-team/seerr/develop/public/logo_full.svg
+        description: Media Requests
+    - IPTV Refresh:
+        href: https://iptv.homelab.local/refresh
+        icon: mdi-refresh
+        description: Refreshes IPTV channels
+- Downloads:
+    - Sonarr:
+        href: https://sonarr.homelab.local
+        icon: sonarr.png
+        description: TV Shows
+    - Radarr:
+        href: https://radarr.homelab.local
+        icon: radarr.png
+        description: Movies
+    - Lidarr:
+        href: https://lidarr.homelab.local
+        icon: lidarr.png
+        description: Music
+    - Bazarr:
+        href: https://bazarr.homelab.local
+        icon: bazarr.png
+        description: Subtitles
+    - Prowlarr:
+        href: https://prowlarr.homelab.local
+        icon: prowlarr.png
+        description: Indexers
+    - NZBGet:
+        href: https://nzbget.homelab.local
+        icon: nzbget.png
+        description: Usenet Downloader
+- Infrastructure:
+    - Proxmox:
+        href: https://proxmox.homelab.local
+        icon: proxmox.png
+        description: Hypervisor
+    - UniFi:
+        href: https://unifi.homelab.local
+        icon: unifi.png
+        description: Network
+    - Traefik:
+        href: https://traefik.homelab.local
+        icon: traefik.png
+        description: Reverse Proxy
+    - Home Assistant:
+        href: https://home.homelab.local
+        icon: home-assistant.png
+        description: Smart Home
+    - Grafana:
+        href: https://grafana.homelab.local
+        icon: grafana.png
+        description: Monitoring
+- Apps:
+    - Mealie:
+        href: https://mealie.homelab.local
+        icon: mealie.png
+        description: Recipe Manager
+    - Miniflux:
+        href: https://rss.homelab.local
+        icon: miniflux.png
+        description: RSS Reader
+    - Memos:
+        href: https://memo.homelab.local
+        icon: memos.png
+        description: Notes

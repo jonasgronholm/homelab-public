@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: memos
+  namespace: memos
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`memo.homelab.local`)
+      services:
+        - name: memos
+          port: 5230
+  tls:
+    certResolver: cloudflare
