@@ -12,8 +12,8 @@ Proxmox VE 8.x running on dedicated server.
 
 | ID  | Name           | Type | CPU | RAM   | Notes                    |
 |-----|----------------|------|-----|-------|--------------------------|
-| 100 | Home-Assistant | QEMU | -   | 612MB | HA with Google Drive backup |
-| 101 | Samba          | LXC  | -   | 73MB  | File share server        |
+| 100 | Home-Assistant | QEMU | 2   | 4GB   |HA with Google Drive backup|
+| 101 | Samba          | LXC  | 2   | 2GB   | File share server        |
 | 102 | servarr        | QEMU | 8   | 16GB  | Jellyfin + arr stack     |
 
 ## Notable Configuration
@@ -37,4 +37,3 @@ Proxmox VE 8.x running on dedicated server.
   - Disk space monitored via Proxmox VE integration in Home Assistant
   - No redundancy — media is redownloadable via arr stack if disk fails
   - Future plan: add second disk for ZFS mirror when prices drop
-  - Future plan: migrate monitoring to Prometheus + Grafana (currently via HA Proxmox VE integration)
