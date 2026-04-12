@@ -14,12 +14,12 @@ Proxmox VE 8.x running on dedicated server.
 |-----|----------------|------|-----|-------|--------------------------|
 | 100 | Home-Assistant | QEMU | 2   | 4GB   |HA with Google Drive backup|
 | 101 | Samba          | LXC  | 2   | 2GB   | File share server        |
-| 102 | servarr        | QEMU | 8   | 16GB  | Jellyfin + arr stack     |
+| 102 | servarr        | QEMU | 8   | 12GB  | Jellyfin + arr stack     |
 
 ## Notable Configuration
 
 - iGPU passthrough (hostpci0: 0000:00:02) on servarr VM for Jellyfin QuickSync
-- Servarr VM disk: 64GB local-lvm
+- Servarr VM disk: 101GB local-lvm
 - Backups: not configured, restore from scratch using this repo
 - Proxmox VE integration in Home Assistant used for monitoring Samba/ZFS disk space
 
