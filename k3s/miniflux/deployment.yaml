@@ -33,12 +33,15 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:17.4
+          image: postgres:17.9
           env:
             - name: POSTGRES_USER
               value: miniflux
             - name: POSTGRES_PASSWORD
-              value: miniflux
+              valueFrom:
+                secretKeyRef:
+                  name: miniflux-secrets
+                  key: POSTGRES_PASSWORD
             - name: POSTGRES_DB
               value: miniflux
           volumeMounts:
@@ -77,10 +80,13 @@ spec:
     spec:
       containers:
         - name: miniflux
-          image: miniflux/miniflux:2.2.5
+          image: miniflux/miniflux:2.2.19
           env:
             - name: DATABASE_URL
-              value: postgres://miniflux:miniflux@miniflux-db/miniflux?sslmode=disable
+              valueFrom:
+                secretKeyRef:
+                  name: miniflux-secrets
+                  key: DATABASE_URL
             - name: RUN_MIGRATIONS
               value: "1"
             - name: CREATE_ADMIN
@@ -88,7 +94,10 @@ spec:
             - name: ADMIN_USERNAME
               value: admin
             - name: ADMIN_PASSWORD
-              value: changeme
+              valueFrom:
+                secretKeyRef:
+                  name: miniflux-secrets
+                  key: ADMIN_PASSWORD
 ---
 apiVersion: v1
 kind: Service
@@ -100,3 +109,4 @@ spec:
     app: miniflux
   ports:
     - port: 8080
+
